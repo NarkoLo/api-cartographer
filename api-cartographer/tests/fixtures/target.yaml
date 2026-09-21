@@ -1,0 +1,22 @@
+source:
+  openapi: openapi.yaml
+target:
+  base_url: https://api.example.test
+  allowed_origins:
+    - https://api.example.test
+  allowed_path_prefixes:
+    - /gateway/
+auth:
+  type: none
+discovery:
+  safe_methods: [GET, HEAD, OPTIONS]
+  requests_per_second: 2
+  parameter_values:
+    id: user-42
+matching:
+  minimum_confidence: 0.65
+  infer_rewrite_rules: true
+output:
+  directory: output
+  redact_headers: [authorization, cookie, set-cookie, x-api-key]
+

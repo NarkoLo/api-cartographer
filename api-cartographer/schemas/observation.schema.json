@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/api-cartographer/observation.schema.json",
+  "title": "Наблюдение HTTP-операции",
+  "type": "object",
+  "required": ["method", "path"],
+  "properties": {
+    "method": {
+      "type": "string",
+      "pattern": "^[A-Z]+$"
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "path_template": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "query_parameters": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "status_code": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599
+    },
+    "response_example": {},
+    "operation_hint": {"type": "string"},
+    "source": {
+      "type": "string",
+      "enum": ["browser", "probe", "manual", "frontend_bundle"]
+    },
+    "validated": {"type": "boolean"},
+    "evidence": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}
+

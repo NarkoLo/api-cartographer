@@ -1,0 +1,46 @@
+source:
+  # Поддерживаются OpenAPI 3.x и Swagger 2.0 в YAML или JSON.
+  openapi: input/openapi.yaml
+
+target:
+  base_url: https://api.example.internal
+  # Поле необязательно. Оно нужно для пассивного изучения API через интерфейс.
+  ui_url: https://example.internal
+  allowed_origins:
+    - https://api.example.internal
+    - https://example.internal
+  allowed_path_prefixes:
+    - /api/
+    - /gateway/
+
+auth:
+  type: bearer
+  token_env: API_BEARER_TOKEN
+  header: Authorization
+  scheme: Bearer
+
+discovery:
+  safe_methods:
+    - GET
+    - HEAD
+    - OPTIONS
+  requests_per_second: 2
+  request_timeout_seconds: 15
+  max_response_bytes: 1048576
+  # Значения нужны только для безопасной проверки шаблонных путей.
+  parameter_values:
+    namespace: default
+    id: example-id
+
+matching:
+  minimum_confidence: 0.70
+  infer_rewrite_rules: true
+
+output:
+  directory: output
+  redact_headers:
+    - authorization
+    - cookie
+    - set-cookie
+    - x-api-key
+

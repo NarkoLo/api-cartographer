@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "node",
+        "scripts/start-playwright-mcp.mjs"
+      ],
+      "enabled": true,
+      "timeout": 20000
+    }
+  },
+  "permission": {
+    "playwright_*": "deny"
+  }
+}

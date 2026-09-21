@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: Тестовый API пользователей
+  version: 1.0.0
+paths:
+  /api/v1/users:
+    get:
+      operationId: listUsers
+      summary: Получить пользователей
+      tags: [users]
+      responses:
+        "200":
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                  total:
+                    type: integer
+    post:
+      operationId: createUser
+      summary: Создать пользователя
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Пользователь создан
+  /api/v1/users/{id}:
+    get:
+      operationId: getUser
+      summary: Получить пользователя
+      tags: [users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Пользователь
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+
