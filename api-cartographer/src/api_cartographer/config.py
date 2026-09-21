@@ -10,6 +10,8 @@ from urllib.parse import urlparse
 
 import yaml
 
+from api_cartographer.environment import load_env_file
+
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 AUTH_TYPES = {"bearer", "none"}
@@ -112,6 +114,9 @@ def load_config(path: str | Path, require_secret: bool = False) -> ProjectConfig
     config_path = Path(path).resolve()
     if not config_path.is_file():
         raise ValueError(f"Файл конфигурации не найден: {config_path}")
+    # Переменные процесса имеют приоритет, а локальный файл заполняет только отсутствующие.
+    project_root = config_path.parent.parent if config_path.parent.name == "config" else config_path.parent
+    load_env_file(project_root / ".env.local")
     raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     root = _require_mapping(raw, "корень")
 
@@ -169,8 +174,6 @@ def load_config(path: str | Path, require_secret: bool = False) -> ProjectConfig
     if not 0 <= confidence <= 1:
         raise ValueError("minimum_confidence должен находиться в диапазоне [0, 1]")
 
-    # Конфигурация обычно находится в config/, поэтому корнем считаем её родителя.
-    project_root = config_path.parent.parent if config_path.parent.name == "config" else config_path.parent
     result = ProjectConfig(
         source=SourceConfig(openapi=str(source_raw["openapi"])),
         target=TargetConfig(

@@ -8,7 +8,7 @@
         "scripts/start-playwright-mcp.mjs"
       ],
       "enabled": true,
-      "timeout": 20000
+      "timeout": 120000
     }
   },
   "permission": {

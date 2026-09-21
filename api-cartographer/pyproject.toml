@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "api-cartographer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Картограф и сопоставитель фактического HTTP API с исходной OpenAPI-спецификацией"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -16,4 +16,3 @@ api-cartographer-healthcheck = "api_cartographer.healthcheck:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

@@ -16,6 +16,7 @@ from typing import Callable, Sequence
 import yaml
 
 from api_cartographer.config import load_config
+from api_cartographer.environment import load_env_file
 
 
 @dataclass(slots=True)
@@ -137,6 +138,27 @@ def _check_secrets(root: Path) -> CheckResult:
     if hits:
         return CheckResult("секреты", "ERROR", f"Возможные токены в файлах: {', '.join(hits)}")
     return CheckResult("секреты", "OK", "Явные Bearer token не обнаружены")
+
+
+def _check_env_loader() -> CheckResult:
+    """Проверяет загрузчик dotenv на одноразовой безопасной переменной."""
+
+    name = "API_CARTOGRAPHER_HEALTHCHECK_SENTINEL"
+    original = os.environ.pop(name, None)
+    try:
+        with tempfile.TemporaryDirectory(prefix="api-cartographer-env-") as temporary:
+            path = Path(temporary) / ".env.local"
+            path.write_text(f"{name}=ready\n", encoding="utf-8")
+            loaded = load_env_file(path)
+            if loaded != 1 or os.environ.get(name) != "ready":
+                return CheckResult("dotenv", "ERROR", "Не удалось загрузить .env.local")
+    except (OSError, ValueError) as exc:
+        return CheckResult("dotenv", "ERROR", str(exc))
+    finally:
+        os.environ.pop(name, None)
+        if original is not None:
+            os.environ[name] = original
+    return CheckResult("dotenv", "OK", ".env.local загружается без вывода значений")
 
 
 def _run_tests(root: Path) -> CheckResult:
@@ -299,6 +321,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         lambda: _check_russian_content(root),
         lambda: _check_example_config(root),
         lambda: _check_secrets(root),
+        _check_env_loader,
         lambda: _check_playwright(args.strict),
         lambda: _check_opencode_binary(args.strict),
         lambda: _run_tests(root),
