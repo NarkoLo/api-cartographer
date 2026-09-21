@@ -64,10 +64,22 @@ def _check_python() -> CheckResult:
 
 
 def _check_opencode(root: Path) -> CheckResult:
+    config_path = root / "opencode.jsonc"
     try:
-        data = json.loads((root / "opencode.jsonc").read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return CheckResult("opencode", "ERROR", f"Некорректный opencode.jsonc: {exc}")
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        return CheckResult(
+            "opencode",
+            "ERROR",
+            f"Некорректный opencode.jsonc {config_path}: {exc}",
+        )
+
+    if not isinstance(data, dict):
+        return CheckResult(
+            "opencode",
+            "ERROR",
+            f"Корень {config_path} должен быть объектом",
+        )
     mcp = data.get("mcp", {}).get("playwright")
     if not mcp or mcp.get("type") != "local" or not mcp.get("enabled"):
         return CheckResult("opencode", "ERROR", "Не настроен локальный Playwright MCP")
