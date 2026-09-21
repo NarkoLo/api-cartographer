@@ -129,6 +129,10 @@ def _check_secrets(root: Path) -> CheckResult:
     for path in root.rglob("*"):
         if not path.is_file() or any(part in {".git", ".venv", "output"} for part in path.parts):
             continue
+
+        if path.name.startswith(".env") and path.name != ".env.example":
+            continue
+
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
@@ -233,14 +237,36 @@ def _check_playwright(strict: bool) -> CheckResult:
 
 
 def _check_opencode_binary(strict: bool) -> CheckResult:
-    """Проверяет наличие OpenCode, не мешая автономной проверке исходников."""
+    """Проверяет явно настроенный или доступный через PATH OpenCode."""
+
+    configured = os.environ.get("OPENCODE_EXECUTABLE", "").strip()
+    if configured:
+        executable_path = Path(configured).expanduser()
+
+        if executable_path.is_file():
+            return CheckResult(
+                "opencode-cli",
+                "OK",
+                str(executable_path),
+            )
+
+        status = "ERROR" if strict else "WARN"
+        return CheckResult(
+            "opencode-cli",
+            status,
+            f"OPENCODE_EXECUTABLE указывает на отсутствующий файл: {executable_path}",
+        )
 
     executable = shutil.which("opencode")
     if executable is None:
         status = "ERROR" if strict else "WARN"
-        return CheckResult("opencode-cli", status, "Команда opencode не найдена")
-    return CheckResult("opencode-cli", "OK", executable)
+        return CheckResult(
+            "opencode-cli",
+            status,
+            "Команда opencode не найдена",
+        )
 
+    return CheckResult("opencode-cli", "OK", executable)
 
 def _check_output(root: Path, config_path: Path) -> CheckResult:
     try:
@@ -314,6 +340,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     args = create_parser().parse_args(argv)
     root = project_root()
+    load_env_file(root / ".env.local")
     checks: list[Callable[[], CheckResult]] = [
         lambda: _check_files(root),
         _check_python,
